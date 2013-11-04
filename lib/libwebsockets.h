@@ -772,6 +772,8 @@ struct libwebsocket_extension {
  *		websocket server at all but just using it as a client
  * @iface:	NULL to bind the listen socket to all interfaces, or the
  *		interface name, eg, "eth2"
+ * @host:   Hostname or IP address to listen on. Takes precedence over @iface
+ *      if this is non-NULL. If both @host and @iface are NULL, listens on all interfaces.
  * @protocols:	Array of structures listing supported protocols and a protocol-
  *		specific callback for each one.  The list is ended with an
  *		entry that has a NULL callback pointer.
@@ -804,6 +806,7 @@ struct libwebsocket_extension {
 
 struct lws_context_creation_info {
 	int port;
+    const char *host;
 	const char *iface;
 	struct libwebsocket_protocols *protocols;
 	struct libwebsocket_extension *extensions;

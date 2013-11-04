@@ -1749,7 +1749,6 @@ libwebsocket_create_context(struct lws_context_creation_info *info)
 #ifndef LWS_NO_SERVER
 	int opt = 1;
 	struct libwebsocket *wsi;
-	struct sockaddr_in serv_addr;
 #endif
 #ifndef LWS_NO_EXTENSIONS
 	int m;
@@ -2159,17 +2158,48 @@ libwebsocket_create_context(struct lws_context_creation_info *info)
 		fcntl(sockfd, F_SETFL, O_NONBLOCK);
 		#endif
 
-		bzero((char *) &serv_addr, sizeof(serv_addr));
-		serv_addr.sin_family = AF_INET;
-		if (info->iface == NULL)
-			serv_addr.sin_addr.s_addr = INADDR_ANY;
-		else
-			interface_to_sa(info->iface, &serv_addr,
-						sizeof(serv_addr));
-		serv_addr.sin_port = htons(info->port);
+		if (info->host == NULL) {
+			// Interface lookup
 
-		n = bind(sockfd, (struct sockaddr *) &serv_addr,
-							     sizeof(serv_addr));
+			struct sockaddr_in serv_addr;
+
+			bzero((char *) &serv_addr, sizeof(serv_addr));
+			serv_addr.sin_family = AF_INET;
+			if (info->iface == NULL)
+				serv_addr.sin_addr.s_addr = INADDR_ANY;
+			else
+				interface_to_sa(info->iface, &serv_addr,
+							sizeof(serv_addr));
+			serv_addr.sin_port = htons(info->port);
+
+			n = bind(sockfd, (struct sockaddr *) &serv_addr,
+								     sizeof(serv_addr));
+		} else {
+			// Hostname lookup, with getaddrinfo.
+
+			char portString[16];
+		    struct addrinfo hints;
+		    struct addrinfo *ai = NULL;
+		    int error;
+
+			snprintf(portString, sizeof portString, "%d", info->port);
+
+		    memset(&hints, 0, sizeof hints);
+		    hints.ai_family = PF_UNSPEC;
+		    hints.ai_flags = AI_PASSIVE;
+
+		    error = getaddrinfo(info->host, portString, &hints, &ai);
+		    if (error) {
+		    	lwsl_err("ERROR looking up server hostname \"%s\" (%d)\n",
+		    		info->host, error);
+		    	compatible_close(sockfd);
+		    	goto bail;
+		    }
+
+		    n = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
+		    freeaddrinfo(ai);
+		}
+
 		if (n < 0) {
 			lwsl_err("ERROR on binding to port %d (%d %d)\n",
 							info->port, n, errno);
