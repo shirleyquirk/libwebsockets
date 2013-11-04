@@ -495,6 +495,12 @@ lws_issue_raw_ext_access(struct libwebsocket *wsi,
 LWS_EXTERN int
 _libwebsocket_rx_flow_control(struct libwebsocket *wsi);
 
+// libwebsocket_read, with support for user callbacks that can consume the incoming packet
+LWS_EXTERN int
+lws_read(struct libwebsocket_context *context,
+         struct libwebsocket *wsi,
+         unsigned char *buf, size_t len);
+
 LWS_EXTERN int
 user_callback_handle_rxflow(callback_function,
 		struct libwebsocket_context *context,

@@ -177,7 +177,7 @@ int lws_server_socket_service(struct libwebsocket_context *context,
 				return 0;
 			}
 
-			n = libwebsocket_read(context, wsi,
+			n = lws_read(context, wsi,
 						context->service_buffer, len);
 			if (n < 0)
 				/* we closed wsi */

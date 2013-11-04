@@ -162,6 +162,8 @@ enum libwebsocket_callback_reasons {
 	LWS_CALLBACK_DEL_POLL_FD,
 	LWS_CALLBACK_SET_MODE_POLL_FD,
 	LWS_CALLBACK_CLEAR_MODE_POLL_FD,
+	/* libwebsocket_read wrapper, for supporting external non-HTTP protocols */
+	LWS_CALLBACK_SOCKET_READ,
 };
 
 #ifndef LWS_NO_EXTENSIONS

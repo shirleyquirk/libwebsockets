@@ -46,6 +46,45 @@
  *       Sec-WebSocket-Protocol: chat
  */
 
+
+/*
+ * Internal wrapper around libwebsocket_read, which gives a callback the
+ * opportunity to inspect and potentially consume the buffer before it passes
+ * to libwebsocket_read. This is used to support external non-HTTP protocols.
+ *
+ * The LWS_CALLBACK_SOCKET_READ callback can return 0 (default) to pass the
+ * packet through to libwebsocket_read. If it returns negative, the connection is
+ * closed. If it returns positive, the packet is not automatically forwarded
+ * to libwebsocket_read. (But the callback may do so explicitly)
+ */
+
+int
+lws_read(struct libwebsocket_context *context,
+         struct libwebsocket *wsi, unsigned char *buf, size_t len)
+{
+	if (libwebsocket_ensure_user_space(wsi)) {
+		goto bail;
+	}
+
+	int r = context->protocols[0].callback(context, wsi,
+		LWS_CALLBACK_SOCKET_READ,
+		wsi->user_space, (void *)buf, len);
+
+	if (r < 0) {
+		goto bail;
+	}
+	if (r == 0) {
+		return libwebsocket_read(context, wsi, buf, len);
+	}
+
+	return 0;
+
+bail:
+	libwebsocket_close_and_free_session(context,
+		wsi, LWS_CLOSE_STATUS_NOSTATUS /* no protocol close */);
+	return -1;
+}
+
 /*
  * We have to take care about parsing because the headers may be split
  * into multiple fragments.  They may contain unknown headers with arbitrary

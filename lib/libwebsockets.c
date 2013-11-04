@@ -1108,7 +1108,7 @@ drain:
 			/* service incoming data */
 
 			if (eff_buf.token_len) {
-				n = libwebsocket_read(context, wsi,
+				n = lws_read(context, wsi,
 					(unsigned char *)eff_buf.token,
 							    eff_buf.token_len);
 				if (n < 0) {
