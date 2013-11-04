@@ -236,9 +236,6 @@ handshake_0405(struct libwebsocket_context *context, struct libwebsocket *wsi)
 		/* okay send the handshake response accepting the connection */
 
 		lwsl_parser("issuing resp pkt %d len\n", (int)(p - response));
-	#ifdef DEBUG
-		fwrite(response, 1,  p - response, stderr);
-	#endif
 		n = libwebsocket_write(wsi, (unsigned char *)response,
 						  p - response, LWS_WRITE_HTTP);
 		if (n != (p - response)) {
