@@ -1,5 +1,3 @@
-#define FD_SETSIZE 256
-
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
@@ -7,6 +5,7 @@
 #include <winsock2.h>
 #else
 #include <WinSock2.h>
+#define FD_SETSIZE 256
 #endif
 #endif
 

@@ -24,7 +24,9 @@
 #if defined(WIN32) || defined(_WIN32)
 #include <tchar.h>
 #include <io.h>
+#ifndef __MINGW32__
 #include <mstcpip.h>
+#endif
 #else
 #ifdef LWS_BUILTIN_GETIFADDRS
 #include <getifaddrs.h>
@@ -1801,10 +1803,12 @@ libwebsocket_create_context(struct lws_context_creation_info *info)
 		/* default to a poll() made out of select() */
 		poll = emulated_poll;
 
+#ifndef LWS_NO_WSAPOLL
 		/* if windows socket lib available, use his WSAPoll */
 		wsdll = GetModuleHandle(_T("Ws2_32.dll"));
 		if (wsdll)
 			poll = (PFNWSAPOLL)GetProcAddress(wsdll, "WSAPoll");
+#endif
 
 		/* Finally fall back to emulated poll if all else fails */
 		if (!poll)

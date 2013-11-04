@@ -39,7 +39,10 @@ extern "C" {
 
 #include "gettimeofday.h"
 
+#ifndef __MINGW32__
 #define strcasecmp stricmp
+#endif
+
 #define getdtablesize() 30000
 
 typedef int ssize_t;

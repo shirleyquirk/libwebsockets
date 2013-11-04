@@ -71,15 +71,21 @@
 #endif
 
 #define compatible_close(fd) closesocket(fd);
-#ifdef __MINGW64__
-#else
+
 #ifdef __MINGW32__
+/* MinGW Fix: Replacement for Mstcpip.h */
+struct tcp_keepalive {
+    unsigned long onoff;
+    unsigned long keepalivetime;
+    unsigned long keepaliveinterval;
+};
+#define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
 #else
 #include <time.h >
-#endif
-#endif
-#include <winsock2.h>
 #include <ws2ipdef.h>
+#endif
+
+#include <winsock2.h>
 #include <windows.h>
 #else
 #include <sys/types.h>

@@ -301,7 +301,7 @@ libwebsocket_read(struct libwebsocket_context *context,
 		}
 		lwsl_info("Allocating RX buffer %d\n", n);
 
-		if (setsockopt(wsi->sock, SOL_SOCKET, SO_SNDBUF,  &n, sizeof n)) {
+		if (setsockopt(wsi->sock, SOL_SOCKET, SO_SNDBUF, (const void*) &n, sizeof n)) {
 			lwsl_warn("Failed to set SNDBUF to %d", n);
 			goto bail;
 		}
